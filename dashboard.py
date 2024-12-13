@@ -1,13 +1,9 @@
 import pandas as pd
 import streamlit as st
 from pickle import dump
-
-from anyio.abc import value
-from keras.src.metrics import Accuracy
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
-from tensorflow.tools.docs.doc_controls import header
 
 from method import *
 import altair as alt
