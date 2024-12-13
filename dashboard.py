@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 from sklearn.model_selection import cross_val_score
+import plotly.express as px
 
 from method import *
 import altair as alt
@@ -52,6 +53,48 @@ with col_first[0]:
     st.title('Dataset summary')
     st.dataframe(summary(df))
 
+st.title('Data Valuation')
+bins = [0, 18.5, 24.9, 29.9, np.inf]
+labels = ['Underweight', 'Normal', 'Overweight', 'Obesity']
+df['BMI_Category'] = pd.cut(df['BMI'], bins=bins, labels=labels)
+
+col_value = st.columns(3)
+with col_value[0]:
+    fig, ax = plt.subplots()
+    ax = sns.boxplot(x='Workout_Type', y='Calories_Burned', data=df, palette='Set3')
+    plt.title('Calories Burned by Workout Type')
+    plt.xlabel('Workout Type')
+    plt.ylabel('Calories Burned')
+    with st.container(border=True):
+        st.pyplot(fig)
+
+with col_value[1]:
+    age_bins = [18, 25, 35, 45, 55, 65]  # Các khoảng độ tuổi
+    age_labels = ['26-35', '36-45', '46-55', '56-65', '66+']  # Tên các nhóm độ tuổi
+    df['Age_Group'] = pd.cut(df['Age'], bins=age_bins, labels=age_labels, right=False)
+    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots()
+    ax = sns.barplot(x='Age_Group', y='Calories_Burned', hue='Workout_Type', data=df, palette='viridis')
+    plt.title('Calories Burned vs Age Group by Workout Type')
+    plt.xlabel('Age Group')
+    plt.ylabel('Average Calories Burned')
+    plt.legend(title='Workout Type')
+    with st.container(border=True):
+        st.pyplot(fig)
+
+
+with col_value[2]:
+
+    fig, ax = plt.subplots()
+    ax = sns.countplot(x='BMI_Category', hue='Workout_Type', data=df, palette='Set2')
+    plt.title('BMI Categories by Workout Type')
+    plt.xlabel('BMI Category')
+    plt.ylabel('Count')
+    plt.legend(title='Workout Type')
+    with st.container(border=True):
+        st.pyplot(fig)
+
+st.title('Data observation')
 col_observe = st.columns(3)
 bar, pie, box = univariateAnalysis_category(observe_variable, df)
 with col_observe[0]:
