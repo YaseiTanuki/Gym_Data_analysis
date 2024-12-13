@@ -1,5 +1,7 @@
 streamlit
 pickle
+numpy
+scipy
 scikit-learn
 altair
 pandas
