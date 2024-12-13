@@ -4,6 +4,7 @@ from pickle import dump
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+from sklearn.model_selection import cross_val_score
 
 from method import *
 import altair as alt
@@ -36,13 +37,13 @@ with st.sidebar:
     st.title('Model')
     modelVars = st.multiselect('Select variables', df.columns, default=['Age'])
     targetVariable = st.selectbox('Select target variable', df.columns)
-    X = df[modelVars]
-    y = df[targetVariable]
-    le = LabelEncoder()
-    isObjectChoosed = False
-    X = pd.get_dummies(X)
-    if y.dtype == 'object':
-        y = le.fit_transform(y)
+    if (modelVars) and (targetVariable):
+        X = df[modelVars]
+        y = df[targetVariable]
+        le = LabelEncoder()
+        X = pd.get_dummies(X)
+        if y.dtype == 'object':
+            y = le.fit_transform(y)
 
 
 
@@ -82,37 +83,63 @@ with col_second[1]:
 st.markdown("""---""")
 
 st.title('Create Model')
-
+model = None
 col_thrid = st.columns((0.3, 0.4, 0.3), gap='medium')
-trained_model_count = 0
 
 with col_thrid[0]:
     st.header('Test set')
     test_size = st.slider('Test size', min_value=0.1, max_value=1.0, step=0.05, value=0.2)
     random_state = st.number_input('Random state', value=1, min_value=1, max_value=4294967295)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    if (modelVars) and (targetVariable):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
 
     st.header('Select type of model')
-    name = st.text_input('Name the model:')
     modelTypes = ['Linear Regression', 'Polynominal Regression', 'Decision Tree Classifier']
     modelType = st.selectbox('Select type of model', modelTypes)
     if modelType == 'Polynominal Regression':
         degree = st.slider('Degree', min_value=1, max_value=5, step=1, value=2)
     if (st.button('Train')):
         if modelType == 'Polynominal Regression':
-            model = trainPolynomial(X_train, y_train, degree)
+            pr = PolynomialFeatures(degree)
+            x_train = pr.fit_transform(X_train)
+            x_test = pr.fit_transform(X_test)
+            model = trainLinear(X_train, y_train)
         if modelType == 'Decision Tree Classifier':
             model = trainDecisionTree(X_train, y_train)
+            st.text(model.predict(X_test))
         else:
             model = trainLinear(X_train, y_train)
-        trained_model_count += 1
 
 with col_thrid[1]:
         st.header('Evaluate model')
-        if (trained_model_count > 0):
+        if model:
             MSE, r_square = evaluate(model, X_test, y_test)
             st.text(f'MSE: {MSE}')
             st.text(f'R Square: {r_square}')
             fig = actualPredictShow(y_test, model.predict(X_test))
             st.pyplot(fig)
+
+st.markdown("""---""")
+st.title('Model detail')
+col_detai = st.columns(3)
+with col_detai[0]:
+    if model:
+        with st.container(border=True):
+            cross_score = cross_val_score(model, X, y, cv=5)
+            st.bar_chart(cross_score)
+with col_detai[1]:
+    if modelType == 'Polynominal Regression':
+        mses = []
+        r_squares = []
+        for n in range(1, 6):
+            test_model = trainLinear(X_train, y_train)
+            mse, r_square = evaluate(test_model, X_test, y_test)
+            mses.append(mse)
+            r_squares.append(r_square)
+        chart_data = pd.DataFrame({'MSE': mses, 'R Square': r_squares})
+        chart_data.index += 1
+        st.dataframe(chart_data)
+        st.line_chart(chart_data)
+
+
 

@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
@@ -110,14 +110,8 @@ def trainLinear(X, y):
     model.fit(X, y)
     return model
 
-def trainPolynomial(X, y, degree):
-    input = [('scale', StandardScaler()), ('poly', PolynomialFeatures(degree)), ('model', LinearRegression())]
-    model = Pipeline(input)
-    model.fit(X, y)
-    return model
-
 def trainDecisionTree(X, y):
-    model = DecisionTreeRegressor()
+    model = DecisionTreeClassifier()
     model.fit(X, y)
     return model
 
