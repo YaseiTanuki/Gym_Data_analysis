@@ -28,7 +28,7 @@ with st.sidebar:
     st.title('Correlation')
     st.header('Correlation')
     numeric_df = df.select_dtypes(include='number')
-    corrVars = st.multiselect('Select variable for correlation check', numeric_df.columns)
+    corrVars = st.multiselect('Select variable for correlation check', numeric_df.columns, default=numeric_df.columns)
     st.header('Scatter')
     scatterX = st.selectbox('Select X', df.columns)
     scatterY = st.selectbox('Select Y:', df.columns)
