@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
@@ -63,7 +64,7 @@ def univariateAnalysis_category(cols, df=None):
     pie = px.pie(
         values=percentage,
         names=value_counts.index,
-        title=f'{cols}',
+        title=' ',
         labels={'names': 'Categories', 'values': 'Percentage'},
         hole=0.5,
         color_discrete_sequence=colors
@@ -98,9 +99,10 @@ def univariateAnalysis_category(cols, df=None):
     return fig, pie, box
 
 def correlationAnalysis_category(df):
-    correlation_matrix = df.corr()
+    correlation_matrix = round(df.corr(), 2)
     fig = go.Figure(data=go.Heatmap(z=correlation_matrix, x=correlation_matrix.columns, y=correlation_matrix.columns))
     fig.update_layout(title='Correlation Heatmap')
+    fig = fig.update_traces(text=correlation_matrix, texttemplate="%{text}", hovertemplate=None)
     return fig
 
 def trainLinear(X, y):
@@ -111,6 +113,11 @@ def trainLinear(X, y):
 def trainPolynomial(X, y, degree):
     input = [('scale', StandardScaler()), ('poly', PolynomialFeatures(degree)), ('model', LinearRegression())]
     model = Pipeline(input)
+    model.fit(X, y)
+    return model
+
+def trainDecisionTree(X, y):
+    model = DecisionTreeRegressor()
     model.fit(X, y)
     return model
 
